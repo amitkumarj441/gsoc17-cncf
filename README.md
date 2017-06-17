@@ -15,5 +15,6 @@
 
    - [GSoC 2017 Proposal](https://docs.google.com/document/d/1SSjZR7QqkFvbt720lbDm8hZg0ckj_ixUwupIT7K3DI0/edit?usp=sharing)
    - [CNCF Blog](https://www.cncf.io/blog/2017/05/04/cncf-brings-kubernetes-coredns-opentracing-prometheus-google-summer-code-2017/)
-
+   - [GSoC with CNCF](https://medium.com/@AMIT_GKP/gsoc-with-cncf-4d619866d01f)
+   - [Waffle Board](https://waffle.io/amitkumarj441/gsoc17-cncf/)
 
