@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/amitkumarj441/gsoc17-cncf.png?label=ready&title=Ready)](https://waffle.io/amitkumarj441/gsoc17-cncf?utm_source=badge)
 # Google Summer of Code 2017 - Standardizing Kubernetes Logs (CNCF)
 
 :rocket: Project tracker - Standardizing Kubernetes logs (CNCF)
