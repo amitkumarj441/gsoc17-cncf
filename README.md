@@ -1,2 +1,7 @@
-# gsoc17-cncf
-:rocket: Google Summer of Code 2017 project tracker - Standardizing Kubernetes logs (CNCF)
+# Google Summer of Code 2017 - Standardizing Kubernetes Logs (CNCF)
+
+:rocket: Project tracker - Standardizing Kubernetes logs (CNCF)
+
+
+
+
