@@ -18,4 +18,8 @@
    - [CNCF Blog](https://www.cncf.io/blog/2017/05/04/cncf-brings-kubernetes-coredns-opentracing-prometheus-google-summer-code-2017/)
    - [GSoC with CNCF](https://medium.com/@AMIT_GKP/gsoc-with-cncf-4d619866d01f)
    - [Waffle Board](https://waffle.io/amitkumarj441/gsoc17-cncf/)
+   
+## Tasks :
+
+  - 1st Evaluation Tasks
 
