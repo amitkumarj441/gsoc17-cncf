@@ -21,9 +21,16 @@
    
 ## Tasks :
 
-  - 1st Evaluation Tasks
+  - 1st Evaluation Tasks [30th May - 30th June 2017]
     
-     - Deploying OpenShift + Logging + ViaQ bits [ Skip MUX configuration]
-     - Setting up common data model used Elasticsearch and Kibana
-     - Configuration of Fluentd with Testing
+     - [x] Deploying OpenShift + Logging + ViaQ bits [ Skip MUX configuration]
+     - [x] Setting up common data model used Elasticsearch and Kibana
+     - [x] Configuration of Fluentd with Testing
+     
+   - 2nd Evaluation Tasks [30th June - 24th July 2017]
+   
+      - [] Creating Pods and its configuration 
+      - [] Setting up the pipeline into Elasticsearch
+      - [] Configuring and streaming logs from Fluentd into Elasticsearch
+      - [] Launch Elasticsearch as a replication controller
 
