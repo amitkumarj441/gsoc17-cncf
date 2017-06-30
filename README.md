@@ -22,4 +22,8 @@
 ## Tasks :
 
   - 1st Evaluation Tasks
+    
+     - Deploying OpenShift + Logging + ViaQ bits [ Skip MUX configuration]
+     - Setting up common data model used Elasticsearch and Kibana
+     - Configuration of Fluentd with Testing
 
