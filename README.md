@@ -29,8 +29,8 @@
      
    - 2nd Evaluation Tasks [30th June - 24th July 2017]
    
-      - [] Creating Pods and its configuration 
-      - [] Setting up the pipeline into Elasticsearch
-      - [] Configuring and streaming logs from Fluentd into Elasticsearch
-      - [] Launch Elasticsearch as a replication controller
+      - [ ] Creating Pods and its configuration 
+      - [ ] Setting up the pipeline into Elasticsearch
+      - [ ] Configuring and streaming logs from Fluentd into Elasticsearch
+      - [ ] Launch Elasticsearch as a replication controller
 
