@@ -1,0 +1,154 @@
+apiVersion: v1
+kind: DeploymentConfig
+metadata:
+  name: logging-kibana
+  namespace: logging
+  selfLink: /oapi/v1/namespaces/logging/deploymentconfigs/logging-kibana
+  uid: 636b2579-574b-11e7-8b3f-000c293d9bc2
+  resourceVersion: '15810'
+  generation: 3
+  creationTimestamp: '2017-06-22T13:04:56Z'
+  labels:
+    component: kibana
+    logging-infra: kibana
+    provider: openshift
+spec:
+  strategy:
+    type: Rolling
+    rollingParams:
+      updatePeriodSeconds: 1
+      intervalSeconds: 1
+      timeoutSeconds: 600
+      maxUnavailable: 25%
+      maxSurge: 25%
+    resources: {}
+    activeDeadlineSeconds: 21600
+  triggers:
+    - type: ConfigChange
+  replicas: 1
+  test: false
+  selector:
+    component: kibana
+    logging-infra: kibana
+    provider: openshift
+  template:
+    metadata:
+      name: logging-kibana
+      creationTimestamp: null
+      labels:
+        component: kibana
+        logging-infra: kibana
+        provider: openshift
+    spec:
+      volumes:
+        - name: kibana
+          secret:
+            secretName: logging-kibana
+            defaultMode: 420
+        - name: kibana-proxy
+          secret:
+            secretName: logging-kibana-proxy
+            defaultMode: 420
+      containers:
+        - name: kibana
+          image: 'docker.io/openshift/origin-logging-kibana:v1.5.1'
+          env:
+            - name: ES_HOST
+              value: logging-es
+            - name: ES_PORT
+              value: '9200'
+            - name: KIBANA_MEMORY_LIMIT
+              valueFrom:
+                resourceFieldRef:
+                  containerName: kibana
+                  resource: limits.memory
+                  divisor: '0'
+          resources:
+            limits:
+              memory: 736Mi
+          volumeMounts:
+            - name: kibana
+              readOnly: true
+              mountPath: /etc/kibana/keys
+          terminationMessagePath: /dev/termination-log
+          imagePullPolicy: Always
+        - name: kibana-proxy
+          image: 'docker.io/openshift/origin-logging-auth-proxy:v1.5.1'
+          ports:
+            - name: oaproxy
+              containerPort: 3000
+              protocol: TCP
+          env:
+            - name: OAP_BACKEND_URL
+              value: 'http://localhost:5601'
+            - name: OAP_AUTH_MODE
+              value: oauth2
+            - name: OAP_TRANSFORM
+              value: 'user_header,token_header'
+            - name: OAP_OAUTH_ID
+              value: kibana-proxy
+            - name: OAP_MASTER_URL
+              value: 'https://kubernetes.default.svc.cluster.local'
+            - name: OAP_PUBLIC_MASTER_URL
+              value: 'https://viaq.logging.test:8443'
+            - name: OAP_LOGOUT_REDIRECT
+              value: 'https://viaq.logging.test:8443/console/logout'
+            - name: OAP_MASTER_CA_FILE
+              value: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            - name: OAP_DEBUG
+              value: 'False'
+            - name: OAP_OAUTH_SECRET_FILE
+              value: /secret/oauth-secret
+            - name: OAP_SERVER_CERT_FILE
+              value: /secret/server-cert
+            - name: OAP_SERVER_KEY_FILE
+              value: /secret/server-key
+            - name: OAP_SERVER_TLS_FILE
+              value: /secret/server-tls.json
+            - name: OAP_SESSION_SECRET_FILE
+              value: /secret/session-secret
+            - name: OCP_AUTH_PROXY_MEMORY_LIMIT
+              valueFrom:
+                resourceFieldRef:
+                  containerName: kibana-proxy
+                  resource: limits.memory
+                  divisor: '0'
+          resources:
+            limits:
+              memory: 96Mi
+          volumeMounts:
+            - name: kibana-proxy
+              readOnly: true
+              mountPath: /secret
+          terminationMessagePath: /dev/termination-log
+          imagePullPolicy: Always
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      serviceAccountName: aggregated-logging-kibana
+      serviceAccount: aggregated-logging-kibana
+      securityContext: {}
+status:
+  latestVersion: 2
+  observedGeneration: 3
+  replicas: 1
+  updatedReplicas: 1
+  availableReplicas: 1
+  unavailableReplicas: 0
+  details:
+    message: manual change
+    causes:
+      - type: Manual
+  conditions:
+    - type: Progressing
+      status: 'True'
+      lastUpdateTime: '2017-06-22T17:28:03Z'
+      lastTransitionTime: '2017-06-22T17:28:03Z'
+      reason: NewReplicationControllerAvailable
+      message: replication controller "logging-kibana-2" successfully rolled out
+    - type: Available
+      status: 'True'
+      lastUpdateTime: '2017-07-04T13:42:54Z'
+      lastTransitionTime: '2017-07-04T13:42:54Z'
+      message: Deployment config has minimum availability.
+  readyReplicas: 1
