@@ -1,0 +1,180 @@
+apiVersion: v1
+kind: DeploymentConfig
+metadata:
+  name: logging-mux
+  namespace: logging
+  selfLink: /oapi/v1/namespaces/logging/deploymentconfigs/logging-mux
+  uid: 21862273-5803-11e7-85bd-000c293d9bc2
+  resourceVersion: '10413'
+  generation: 2
+  creationTimestamp: '2017-06-23T11:00:12Z'
+  labels:
+    component: mux
+    logging-infra: mux
+    provider: openshift
+spec:
+  strategy:
+    type: Rolling
+    rollingParams:
+      updatePeriodSeconds: 1
+      intervalSeconds: 1
+      timeoutSeconds: 600
+      maxUnavailable: 25%
+      maxSurge: 25%
+    resources: {}
+    activeDeadlineSeconds: 21600
+  triggers:
+    - type: ConfigChange
+  replicas: 1
+  test: false
+  selector:
+    component: mux
+    provider: openshift
+  template:
+    metadata:
+      name: mux
+      creationTimestamp: null
+      labels:
+        component: mux
+        logging-infra: mux
+        provider: openshift
+    spec:
+      volumes:
+        - name: config
+          configMap:
+            name: logging-mux
+            defaultMode: 420
+        - name: certs
+          secret:
+            secretName: logging-fluentd
+            defaultMode: 420
+        - name: dockerhostname
+          hostPath:
+            path: /etc/hostname
+        - name: localtime
+          hostPath:
+            path: /etc/localtime
+        - name: muxcerts
+          secret:
+            secretName: logging-mux
+            defaultMode: 420
+      containers:
+        - name: mux
+          image: 'docker.io/openshift/origin-logging-fluentd:v1.5.1'
+          ports:
+            - name: mux-forward
+              containerPort: 24284
+              protocol: TCP
+            - name: tcp-json
+              containerPort: 23456
+              protocol: TCP
+          env:
+            - name: FORWARD_LISTEN_HOST
+              value: mux.viaq.logging.test
+            - name: FORWARD_LISTEN_PORT
+              value: '24284'
+            - name: TCP_JSON_PORT
+              value: '23456'
+            - name: MUX_ALLOW_EXTERNAL
+              value: 'true'
+            - name: USE_MUX
+              value: 'true'
+            - name: USE_JOURNAL
+              value: 'true'
+            - name: K8S_HOST_URL
+              value: 'https://kubernetes.default.svc.cluster.local'
+            - name: ES_HOST
+              value: logging-es
+            - name: ES_PORT
+              value: '9200'
+            - name: ES_CLIENT_CERT
+              value: /etc/fluent/keys/cert
+            - name: ES_CLIENT_KEY
+              value: /etc/fluent/keys/key
+            - name: ES_CA
+              value: /etc/fluent/keys/ca
+            - name: OPS_HOST
+              value: logging-es
+            - name: OPS_PORT
+              value: '9200'
+            - name: OPS_CLIENT_CERT
+              value: /etc/fluent/keys/cert
+            - name: OPS_CLIENT_KEY
+              value: /etc/fluent/keys/key
+            - name: OPS_CA
+              value: /etc/fluent/keys/ca
+            - name: ES_COPY
+              value: 'false'
+            - name: ES_COPY_HOST
+            - name: ES_COPY_PORT
+            - name: ES_COPY_SCHEME
+              value: https
+            - name: ES_COPY_CLIENT_CERT
+            - name: ES_COPY_CLIENT_KEY
+            - name: ES_COPY_CA
+            - name: ES_COPY_USERNAME
+            - name: ES_COPY_PASSWORD
+            - name: OPS_COPY_HOST
+            - name: OPS_COPY_PORT
+            - name: OPS_COPY_SCHEME
+              value: https
+            - name: OPS_COPY_CLIENT_CERT
+            - name: OPS_COPY_CLIENT_KEY
+            - name: OPS_COPY_CA
+            - name: OPS_COPY_USERNAME
+            - name: OPS_COPY_PASSWORD
+            - name: JOURNAL_SOURCE
+            - name: JOURNAL_READ_FROM_HEAD
+          resources:
+            limits:
+              cpu: 500m
+              memory: 2Gi
+          volumeMounts:
+            - name: config
+              readOnly: true
+              mountPath: /etc/fluent/configs.d/user
+            - name: certs
+              readOnly: true
+              mountPath: /etc/fluent/keys
+            - name: dockerhostname
+              readOnly: true
+              mountPath: /etc/docker-hostname
+            - name: localtime
+              readOnly: true
+              mountPath: /etc/localtime
+            - name: muxcerts
+              readOnly: true
+              mountPath: /etc/fluent/muxkeys
+          terminationMessagePath: /dev/termination-log
+          imagePullPolicy: Always
+          securityContext:
+            privileged: true
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      serviceAccountName: aggregated-logging-fluentd
+      serviceAccount: aggregated-logging-fluentd
+      securityContext: {}
+status:
+  latestVersion: 1
+  observedGeneration: 2
+  replicas: 0
+  updatedReplicas: 0
+  availableReplicas: 0
+  unavailableReplicas: 0
+  details:
+    message: config change
+    causes:
+      - type: ConfigChange
+  conditions:
+    - type: Available
+      status: 'False'
+      lastUpdateTime: '2017-06-23T11:00:12Z'
+      lastTransitionTime: '2017-06-23T11:00:12Z'
+      message: Deployment config does not have minimum availability.
+    - type: Progressing
+      status: 'False'
+      lastUpdateTime: '2017-06-23T11:10:16Z'
+      lastTransitionTime: '2017-06-23T11:10:16Z'
+      reason: ProgressDeadlineExceeded
+      message: replication controller "logging-mux-1" has failed progressing
