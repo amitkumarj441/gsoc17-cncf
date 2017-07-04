@@ -1,0 +1,132 @@
+apiVersion: v1
+kind: DeploymentConfig
+metadata:
+  name: logging-es-7vo926zw
+  namespace: logging
+  selfLink: /oapi/v1/namespaces/logging/deploymentconfigs/logging-es-7vo926zw
+  uid: 690a315a-574b-11e7-8b3f-000c293d9bc2
+  resourceVersion: '15974'
+  generation: 5
+  creationTimestamp: '2017-06-22T13:05:05Z'
+  labels:
+    component: es
+    deployment: logging-es-7vo926zw
+    logging-infra: elasticsearch
+    provider: openshift
+spec:
+  strategy:
+    type: Recreate
+    recreateParams:
+      timeoutSeconds: 600
+    resources: {}
+    activeDeadlineSeconds: 21600
+  triggers:
+    - type: ConfigChange
+  replicas: 1
+  test: false
+  selector:
+    component: es
+    deployment: logging-es-7vo926zw
+    logging-infra: elasticsearch
+    provider: openshift
+  template:
+    metadata:
+      name: logging-es-7vo926zw
+      creationTimestamp: null
+      labels:
+        component: es
+        deployment: logging-es-7vo926zw
+        logging-infra: elasticsearch
+        provider: openshift
+    spec:
+      volumes:
+        - name: elasticsearch
+          secret:
+            secretName: logging-elasticsearch
+            defaultMode: 420
+        - name: elasticsearch-config
+          configMap:
+            name: logging-elasticsearch
+            defaultMode: 420
+        - name: elasticsearch-storage
+          emptyDir: {}
+      containers:
+        - name: elasticsearch
+          image: 'docker.io/openshift/origin-logging-elasticsearch:v1.5.1'
+          ports:
+            - name: restapi
+              containerPort: 9200
+              protocol: TCP
+            - name: cluster
+              containerPort: 9300
+              protocol: TCP
+          env:
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+            - name: KUBERNETES_TRUST_CERT
+              value: 'true'
+            - name: SERVICE_DNS
+              value: logging-es-cluster
+            - name: CLUSTER_NAME
+              value: logging-es
+            - name: INSTANCE_RAM
+              value: 8Gi
+            - name: NODE_QUORUM
+              value: '1'
+            - name: RECOVER_AFTER_NODES
+              value: '0'
+            - name: RECOVER_EXPECTED_NODES
+              value: '1'
+            - name: RECOVER_AFTER_TIME
+              value: 5m
+          resources:
+            limits:
+              memory: 8Gi
+            requests:
+              memory: 512Mi
+          volumeMounts:
+            - name: elasticsearch
+              readOnly: true
+              mountPath: /etc/elasticsearch/secret
+            - name: elasticsearch-config
+              readOnly: true
+              mountPath: /usr/share/java/elasticsearch/config
+            - name: elasticsearch-storage
+              mountPath: /elasticsearch/persistent
+          terminationMessagePath: /dev/termination-log
+          imagePullPolicy: Always
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      serviceAccountName: aggregated-logging-elasticsearch
+      serviceAccount: aggregated-logging-elasticsearch
+      securityContext:
+        supplementalGroups:
+          - 65534
+status:
+  latestVersion: 2
+  observedGeneration: 5
+  replicas: 1
+  updatedReplicas: 1
+  availableReplicas: 0
+  unavailableReplicas: 1
+  details:
+    message: manual change
+    causes:
+      - type: Manual
+  conditions:
+    - type: Available
+      status: 'False'
+      lastUpdateTime: '2017-06-22T13:05:05Z'
+      lastTransitionTime: '2017-06-22T13:05:05Z'
+      message: Deployment config does not have minimum availability.
+    - type: Progressing
+      status: 'True'
+      lastUpdateTime: '2017-06-22T16:57:16Z'
+      lastTransitionTime: '2017-06-22T16:52:35Z'
+      reason: NewReplicationControllerAvailable
+      message: replication controller "logging-es-7vo926zw-2" successfully rolled out
+  readyReplicas: 1
