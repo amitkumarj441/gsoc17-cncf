@@ -1,0 +1,123 @@
+apiVersion: v1
+kind: DeploymentConfig
+metadata:
+  name: logging-curator
+  namespace: logging
+  selfLink: /oapi/v1/namespaces/logging/deploymentconfigs/logging-curator
+  uid: 57dd0acb-574b-11e7-8b3f-000c293d9bc2
+  resourceVersion: '15804'
+  generation: 2
+  creationTimestamp: '2017-06-22T13:04:36Z'
+  labels:
+    component: curator
+    logging-infra: curator
+    provider: openshift
+spec:
+  strategy:
+    type: Recreate
+    recreateParams:
+      timeoutSeconds: 600
+    rollingParams:
+      updatePeriodSeconds: 1
+      intervalSeconds: 1
+      timeoutSeconds: 600
+      maxUnavailable: 25%
+      maxSurge: 25%
+    resources: {}
+    activeDeadlineSeconds: 21600
+  triggers:
+    - type: ConfigChange
+  replicas: 1
+  test: false
+  selector:
+    component: curator
+    logging-infra: curator
+    provider: openshift
+  template:
+    metadata:
+      name: logging-curator
+      creationTimestamp: null
+      labels:
+        component: curator
+        logging-infra: curator
+        provider: openshift
+    spec:
+      volumes:
+        - name: certs
+          secret:
+            secretName: logging-curator
+            defaultMode: 420
+        - name: config
+          configMap:
+            name: logging-curator
+            defaultMode: 420
+      containers:
+        - name: curator
+          image: 'docker.io/openshift/origin-logging-curator:v1.5.1'
+          env:
+            - name: K8S_HOST_URL
+              value: 'https://kubernetes.default.svc.cluster.local'
+            - name: ES_HOST
+              value: logging-es
+            - name: ES_PORT
+              value: '9200'
+            - name: ES_CLIENT_CERT
+              value: /etc/curator/keys/cert
+            - name: ES_CLIENT_KEY
+              value: /etc/curator/keys/key
+            - name: ES_CA
+              value: /etc/curator/keys/ca
+            - name: CURATOR_DEFAULT_DAYS
+              value: '30'
+            - name: CURATOR_RUN_HOUR
+              value: '0'
+            - name: CURATOR_RUN_MINUTE
+              value: '0'
+            - name: CURATOR_RUN_TIMEZONE
+              value: UTC
+            - name: CURATOR_SCRIPT_LOG_LEVEL
+              value: INFO
+            - name: CURATOR_LOG_LEVEL
+              value: ERROR
+          resources:
+            limits:
+              cpu: 100m
+          volumeMounts:
+            - name: certs
+              readOnly: true
+              mountPath: /etc/curator/keys
+            - name: config
+              readOnly: true
+              mountPath: /etc/curator/settings
+          terminationMessagePath: /dev/termination-log
+          imagePullPolicy: Always
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      serviceAccountName: aggregated-logging-curator
+      serviceAccount: aggregated-logging-curator
+      securityContext: {}
+status:
+  latestVersion: 1
+  observedGeneration: 2
+  replicas: 1
+  updatedReplicas: 1
+  availableReplicas: 1
+  unavailableReplicas: 0
+  details:
+    message: config change
+    causes:
+      - type: ConfigChange
+  conditions:
+    - type: Progressing
+      status: 'True'
+      lastUpdateTime: '2017-06-22T13:14:37Z'
+      lastTransitionTime: '2017-06-22T13:08:55Z'
+      reason: NewReplicationControllerAvailable
+      message: replication controller "logging-curator-1" successfully rolled out
+    - type: Available
+      status: 'True'
+      lastUpdateTime: '2017-07-04T13:42:53Z'
+      lastTransitionTime: '2017-07-04T13:42:53Z'
+      message: Deployment config has minimum availability.
+  readyReplicas: 1
