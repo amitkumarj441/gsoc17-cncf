@@ -32,5 +32,5 @@
       - [x] Creating Pods and its configuration 
       - [x] Setting up the pipeline into Elasticsearch
       - [x] Configuring and streaming logs from Fluentd into Elasticsearch
-      - [ ] Launch Elasticsearch as a replication controller
+      - [x] Launch Elasticsearch as a replication controller
 
