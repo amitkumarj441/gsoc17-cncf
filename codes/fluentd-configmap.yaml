@@ -1,0 +1,285 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluentd-config
+  namespace: logging
+  labels:
+    k8s-app: fluentd
+data:
+  fluentd.conf: |
+    @include "#{ENV['FLUENTD_CONFIG'] || 'fluentd-standalone.conf'}"
+
+  fluentd-standalone.conf: |
+    @include general.conf
+
+    @include systemd-input.conf
+    @include kubernetes-input.conf
+    @include apiserver-audit-input.conf
+
+    @include systemd-filter.conf
+    @include kubernetes-filter.conf
+    @include extra.conf
+
+    @include output.conf
+
+  fluentd-forwarder.conf: |
+    @include general.conf
+
+    @include apiserver-audit-input.conf
+    @include systemd-input.conf
+    @include kubernetes-input.conf
+
+    @include forward-output.conf
+
+  fluentd-aggregator.conf: |
+    @include forward-input.conf
+
+    @include general.conf
+
+    @include systemd-filter.conf
+    @include kubernetes-filter.conf
+    @include extra.conf
+
+    @include output.conf
+
+  forward-input.conf: |
+    <source>
+      @type forward
+      port 24224
+      bind 0.0.0.0
+    </source>
+
+  forward-output.conf: |
+    <match **>
+      @type forward
+      require_ack_response true
+      ack_response_timeout 30
+      recover_wait 10s
+      heartbeat_interval 1s
+      phi_threshold 16
+      send_timeout 10s
+      hard_timeout 10s
+      expire_dns_cache 15
+
+      heartbeat_type tcp
+
+      buffer_chunk_limit 2M
+      buffer_queue_limit 32
+      flush_interval 5s
+      max_retry_wait 15
+      disable_retry_limit
+      num_threads 8
+
+      <server>
+        name fluentd-aggregator
+        host fluentd-aggregator.logging.svc.cluster.local
+        weight 60
+      </server>
+    </match>
+
+  general.conf: |
+    <match fluent.**>
+      type null
+    </match>
+
+    <source>
+      @type http
+      port 9880
+      bind 0.0.0.0
+    </source>
+
+    <source>
+      @type monitor_agent
+      bind 0.0.0.0
+      port 24220
+      tag fluentd.monitor.metrics
+    </source>
+
+
+  systemd.conf: |
+    @include systemd-input.conf
+    @include systemd-filter.conf
+
+  systemd-input.conf: |
+    <source>
+      @type systemd
+      pos_file /var/log/fluentd-journald-systemd.pos
+      read_from_head true
+      strip_underscores true
+      tag systemd
+    </source>
+
+  systemd-filter.conf: |
+    <match systemd>
+      @type rewrite_tag_filter
+      rewriterule1 SYSTEMD_UNIT   ^(.+).service$  systemd.$1
+      rewriterule2 SYSTEMD_UNIT   !^(.+).service$ systemd.unmatched
+    </match>
+
+    <filter systemd.kubelet>
+      type parser
+      format kubernetes
+      reserve_data true
+      key_name MESSAGE
+      suppress_parse_error_log true
+    </filter>
+
+    <filter systemd.docker>
+      type parser
+      format /^time="(?<time>[^)]*)" level=(?<severity>[^ ]*) msg="(?<message>[^"]*)"( err="(?<error>[^"]*)")?( statusCode=($<status_code>\d+))?/
+      reserve_data true
+      key_name MESSAGE
+      suppress_parse_error_log true
+    </filter>
+
+    <filter systemd.**>
+      @type grep
+      exclude1 SYSTEMD_UNIT (sshd@.*\.service)
+    </filter>
+
+  kubernetes.conf: |
+    @include kubernetes-input.conf
+    @include kubernetes-filter.conf
+
+  kubernetes-input.conf: |
+    <source>
+      type tail
+      path /var/log/containers/*.log
+      pos_file /var/log/fluentd-containers.log.pos
+      time_format %Y-%m-%dT%H:%M:%S.%NZ
+      tag kubernetes.*
+      format json
+      read_from_head true
+    </source>
+
+  kubernetes-filter.conf: |
+    <filter kubernetes.**>
+      type kubernetes_metadata
+      merge_json_log true
+      preserve_json_log true
+    </filter>
+
+    <filter kubernetes.**>
+      @type record_transformer
+      enable_ruby true
+      <record>
+        kubernetes_namespace_container_name ${record["kubernetes"]["namespace_name"]}.${record["kubernetes"]["container_name"]}
+      </record>
+    </filter>
+
+    <match kubernetes.**>
+      @type rewrite_tag_filter
+      rewriterule1 kubernetes_namespace_container_name  ^(.+)$ kube.$1
+    </match>
+
+    <filter kube.**>
+      @type record_transformer
+      remove_keys kubernetes_namespace_container_name
+    </filter>
+
+    <filter kube.kube-system.**>
+      type parser
+      format kubernetes
+      reserve_data true
+      key_name log
+      suppress_parse_error_log true
+    </filter>
+
+  apiserver-audit-input.conf: |
+    <source>
+      type tail
+      format multiline
+      multiline_flush_interval 5s
+      format_firstline /^\S+\s+AUDIT:/
+      format1 /^(?<time>\S+) AUDIT:(?: (?:id="(?<id>(?:[^"\\]|\\.)*)"|ip="(?<ip>(?:[^"\\]|\\.)*)"|method="(?<method>(?:[^"\\]|\\.)*)"|user="(?<user>(?:[^"\\]|\\.)*)"|groups="(?<groups>(?:[^"\\]|\\.)*)"|as="(?<as>(?:[^"\\]|\\.)*)"|asgroups="(?<asgroups>(?:[^"\\]|\\.)*)"|namespace="(?<namespace>(?:[^"\\]|\\.)*)"|uri="(?<uri>(?:[^"\\]|\\.)*)"|response="(?<response>(?:[^"\\]|\\.)*)"|\w+="(?:[^"\\]|\\.)*"))*/
+      time_format %FT%T.%L%Z
+      path /var/log/kubernetes/kube-apiserver-audit.log
+      pos_file /var/log/kube-apiserver-audit.log.pos
+      tag kube-apiserver-audit
+    </source>
+
+  output.conf: |
+    <match **>
+      type elasticsearch
+      log_level info
+      include_tag_key true
+      host elasticsearch.elasticsearch.svc.cluster.local
+      port 9200
+      scheme http
+      ssl_verify false
+
+      kibana_format true
+      template_file /fluentd/etc/elasticsearch-template-es5x.json
+      template_name elasticsearch-template-es5x.json
+
+      buffer_chunk_limit 2M
+      buffer_queue_limit 32
+      flush_interval 10s
+      max_retry_wait 30
+      disable_retry_limit
+      num_threads 8
+
+    </match>
+
+  elasticsearch-template-es5x.json: |
+    {
+      "template" : "kibana-*",
+      "version" : 50001,
+      "settings" : {
+        "index.refresh_interval" : "5s",
+        "number_of_shards": 1
+      },
+      "mappings" : {
+        "_default_" : {
+          "_all" : {"enabled" : true, "norms" : false},
+          "dynamic_templates" : [ {
+            "message_field" : {
+              "path_match" : "message",
+              "match_mapping_type" : "string",
+              "mapping" : {
+                "type" : "text",
+                "norms" : false
+              }
+            }
+          }, {
+            "string_fields" : {
+              "match" : "*",
+              "match_mapping_type" : "string",
+              "mapping" : {
+                "type" : "text", "norms" : false,
+                "fields" : {
+                  "keyword" : { "type": "keyword" }
+                }
+              }
+            }
+          } ],
+          "properties" : {
+            "@timestamp": { "type": "date", "include_in_all": false },
+            "@version": { "type": "keyword", "include_in_all": false },
+            "geoip"  : {
+              "dynamic": true,
+              "properties" : {
+                "ip": { "type": "ip" },
+                "location" : { "type" : "geo_point" },
+                "latitude" : { "type" : "half_float" },
+                "longitude" : { "type" : "half_float" }
+              }
+            }
+          }
+        }
+      }
+    }
+  extra.conf: |
+    <filter kube.kube-system.**>
+    @type parser
+    reserve_data true
+    suppress_parse_error_log true
+    </filter>
+  
+    <filter kube.default.**>
+    @type parser
+    format apache_error
+    key_name log
+    reserve_data true
+    suppress_parse_error_log true 
+    </filter>
