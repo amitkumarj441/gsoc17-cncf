@@ -14,7 +14,7 @@ spec:
         - resources:
             requests:
               cpu: 0.15
-          image: "Fluentd Image"
+          image: docker.io/openshift/origin-logging-fluentd v1.5.1
           name: fluentd
           volumeMounts:
           - mountPath: "/var/log/containers"
