@@ -24,7 +24,7 @@
   - 1st Evaluation Tasks [30th May - 30th June 2017]
     
      - [x] Deploying OpenShift + Logging + ViaQ bits [ Skip MUX configuration]
-     - [x] Setting up common data model used Elasticsearch and Kibana
+     - [x] Setting up common data model used by Elasticsearch and Kibana
      - [x] Configuration of Fluentd with Testing
      
    - Mid Evaluation Tasks [30th June - 28th July 2017]
@@ -36,6 +36,8 @@
    
    - Final Evaluation Tasks [28th July - 21st August 2017]
    
-      - [ ] Structuring Kubernetes logs 
-      - [ ] Display Kube components logs in Kibana
-      - [ ] Configure a Kibana service to enable cluster-level logging using Google Cloud
+      - [x] Change easily fluentd pod configuration 
+      - [ ] Structuring Kubernetes logs  
+      - [ ] Create filter to rewrite "origin-node" and "origin-master" logs
+      - [ ] Create filtes with Kubernetes logs structure
+      - [ ] Display Kubernetes components logs in Kibana
