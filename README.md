@@ -2,7 +2,7 @@
 # Google Summer of Code 2017 - Standardizing Kubernetes Logs (CNCF)
    Code before pondering. Multipurpose learning
    
-:rocket: Project tracker - Standardizing Kubernetes logs (CNCF)
+:rocket: Project tracker - Create and implement a data model to standardize Kubernetes logs (CNCF)
 
 ##  :bow:Student Portfolio
 
@@ -27,10 +27,15 @@
      - [x] Setting up common data model used Elasticsearch and Kibana
      - [x] Configuration of Fluentd with Testing
      
-   - 2nd Evaluation Tasks [30th June - 24th July 2017]
+   - Mid Evaluation Tasks [30th June - 28th July 2017]
    
       - [x] Creating Pods and its configuration 
       - [x] Setting up the pipeline into Elasticsearch
       - [x] Configuring and streaming logs from Fluentd into Elasticsearch
       - [x] Launch Elasticsearch as a replication controller
-
+   
+   - Final Evaluation Tasks [28th July - 21st August 2017]
+   
+      - [ ] Structuring Kubernetes logs 
+      - [ ] Display Kube components logs in Kibana
+      - [ ] Configure a Kibana service to enable cluster-level logging using Google Cloud
