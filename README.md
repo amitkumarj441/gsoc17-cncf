@@ -38,6 +38,6 @@
    
       - [x] Change easily fluentd pod configuration 
       - [ ] Structuring Kubernetes logs  
-      - [ ] Create filter to rewrite "origin-node" and "origin-master" logs
+      - [x] Create filter to rewrite "origin-node" and "origin-master" logs
       - [ ] Create filtes with Kubernetes logs structure
       - [ ] Display Kubernetes components logs in Kibana
