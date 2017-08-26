@@ -72,3 +72,9 @@ Total Issues Opened: 1
 Total Pull Requests Created/Merged: 1
 
    1. [kubernetes-incubator/kubespray#1408](https://github.com/kubernetes-incubator/kubespray/pull/1408) - Remove deprecated `enable-cri` flag in Kubernetes 1.7
+   
+**Repository: Kubernetes**
+
+Total Issues Opened: 1
+
+   1. [kubernetes/kubernetes#51405](https://github.com/kubernetes/kubernetes/issues/51405) - Fluentd filter to process Kubernetes logs
