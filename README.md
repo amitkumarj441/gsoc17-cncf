@@ -37,7 +37,38 @@
    - Final Evaluation Tasks [28th July - 21st August 2017]
    
       - [x] Change easily fluentd pod configuration 
-      - [ ] Structuring Kubernetes logs  
+      - [x] Structuring Kubernetes logs  
       - [x] Create filter to rewrite "origin-node" and "origin-master" logs
-      - [ ] Create filtes with Kubernetes logs structure
-      - [ ] Display Kubernetes components logs in Kibana
+      - [x] Create filter with Kubernetes logs structure
+      - [ ] Display Kubernetes components logs in Kibana      
+
+## Blog posts
+
+   - [GSoC with Kubernetes@CNCF](https://medium.com/@AMIT_GKP/gsoc-with-cncf-4d619866d01f)
+   
+   Note: I have decided not to post any weekly updates as blog posts as such. I'll soon post a blogposts which will focus more on technical content.
+   
+## Pull Requests and Issues
+
+**Repository: ViaQ**
+
+Total Pull Requests Created/Merged: 2
+
+   1. [ViaQ/Main#5](https://github.com/ViaQ/Main/pull/5) - Added Patch OpenShift Ansible
+   2. [ViaQ/Main#5](https://github.com/ViaQ/Main/pull/10) - Updated Fluentd Pod Config
+   
+**Repository: OpenShift Origin**
+
+Total Pull Requests Created: 1
+
+   1. [openshift/origin-aggregated-logging#517](https://github.com/openshift/origin-aggregated-logging/pull/517) - Update to Fluentd and logging components 
+   
+Total Issues Opened: 1
+
+   1. [openshift/origin-aggregated-logging#549](https://github.com/openshift/origin-aggregated-logging/issues/549) - Prometheus exporter to expose metrics from Elasticsearch
+   
+**Repository: Kubernetes Incubator/Kubespray**
+
+Total Pull Requests Created/Merged: 1
+
+   1. [kubernetes-incubator/kubespray#1408](https://github.com/kubernetes-incubator/kubespray/pull/1408) - Remove deprecated `enable-cri` flag in Kubernetes 1.7
