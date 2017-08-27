@@ -52,10 +52,11 @@
 
 **Repository: ViaQ**
 
-Total Pull Requests Created/Merged: 2
+Total Pull Requests Created/Merged: 3
 
    1. [ViaQ/Main#5](https://github.com/ViaQ/Main/pull/5) - Added Patch OpenShift Ansible
-   2. [ViaQ/Main#5](https://github.com/ViaQ/Main/pull/10) - Updated Fluentd Pod Config
+   2. [ViaQ/Main#10](https://github.com/ViaQ/Main/pull/10) - Updated Fluentd Pod Config
+   3. [ViaQ/Main#21](https://github.com/ViaQ/Main/pull/21) - Update link [README-mux.md -> README-install.md]
    
 **Repository: OpenShift Origin**
 
