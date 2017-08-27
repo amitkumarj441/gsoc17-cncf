@@ -2,15 +2,6 @@
 #
 # Set secure-forward.conf in logging-fluentd configmap to relay to log-relay
 # fluentd pod.
-#
-### VARIABLES
-#
-# none
-#
-### DEPENDENCIES
-#
-# none
-#
 
 - name: Get logging fluentd configmap
   command: >
