@@ -1,0 +1,97 @@
+### DESCRIPTION
+#
+# Set secure-forward.conf in logging-fluentd configmap to relay to log-relay
+# fluentd pod.
+#
+### VARIABLES
+#
+# none
+#
+### DEPENDENCIES
+#
+# none
+#
+
+- name: Get logging fluentd configmap
+  command: >
+    oc get configmap logging-fluentd -n logging -o json
+  changed_when: false
+  register: get_fluentd_configmap
+
+- name: Update fluent.conf in logging-fluentd configmap
+  command: >
+    oc patch configmap logging-fluentd -n logging -R
+    -p {{ {"data":{"fluent.conf":fluent_conf}} | to_json | quote }}
+  vars:
+    fluent_conf: |
+      # This file is the fluentd configuration entrypoint. Edit with care.
+
+      @include configs.d/openshift/system.conf
+
+      # In each section below, pre- and post- includes don't include anything initially;
+      # they exist to enable future additions to openshift conf as needed.
+
+      ## sources
+      ## ordered so that syslog always runs last...
+      @include configs.d/openshift/input-pre-*.conf
+      @include configs.d/dynamic/input-docker-*.conf
+      # Disable collection of syslog messages
+      #@include configs.d/dynamic/input-syslog-*.conf
+      @include configs.d/openshift/input-post-*.conf
+      ##
+
+      <label @INGRESS>
+
+      ## filters
+        @include configs.d/openshift/filter-pre-*.conf
+        @include configs.d/openshift/filter-retag-journal.conf
+        @include configs.d/openshift/filter-k8s-meta.conf
+        @include configs.d/openshift/filter-kibana-transform.conf
+        @include configs.d/openshift/filter-k8s-record-transform.conf
+        @include configs.d/openshift/filter-syslog-record-transform.conf
+        @include configs.d/openshift/filter-common-data-model.conf
+        @include configs.d/openshift/filter-post-*.conf
+      ##
+
+      # Exclude router certificate errors from logging.
+      <filter kubernetes.**.router**>
+        @type grep
+        exclude1 message does not have the required certificates
+      </filter>
+
+      ## matches
+        @include configs.d/openshift/output-pre-*.conf
+        @include configs.d/openshift/output-operations.conf
+        @include configs.d/openshift/output-applications.conf
+        # no post - applications.conf matches everything left
+      ##
+      </label>
+  when: >
+    fluent_conf != get_fluentd_configmap.stdout | from_json | json_query('data."fluent.conf"')
+  notify: restart logging fluentd
+
+- name: Update secure-forward.conf in logging-fluentd configmap
+  command: >
+    oc patch configmap logging-fluentd -n logging -R
+    -p {{ {"data":{"secure-forward.conf":fluent_secure_forward_conf}} | to_json | quote }}
+  vars:
+    fluent_secure_forward_conf: |
+      <store>
+        @type secure_forward
+
+        self_hostname ${HOSTNAME}
+        shared_key thisisasharedkey
+        flush_interval 5s
+
+        secure yes
+        enable_strict_verification yes
+        ca_cert_path /run/secrets/kubernetes.io/serviceaccount/ca.crt
+
+        <server>
+          host syslog-relay.log-relay.svc.cluster.local
+          port 24284
+        </server>
+      </store>
+  when: >
+    fluent_secure_forward_conf != get_fluentd_configmap.stdout | from_json | json_query('data."secure-forward.conf"')
+  notify: restart logging fluentd
