@@ -40,7 +40,11 @@
       - [x] Structuring Kubernetes logs  
       - [x] Create filter to rewrite "origin-node" and "origin-master" logs
       - [x] Create filter with Kubernetes logs structure
-      - [ ] Display Kubernetes components logs in Kibana      
+      - [x] Display Kubernetes components logs in Kibana      
+
+## Demo!
+
+[![GSoC with CNCF (Kubernetes)](http://img.youtube.com/vi/1SuseQnqqW8/maxresdefault.jpg)](https://www.youtube.com/watch?v=1SuseQnqqW8)
 
 ## Blog posts
 
