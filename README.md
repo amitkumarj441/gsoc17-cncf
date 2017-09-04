@@ -56,7 +56,7 @@
 
 **Repository: ViaQ**
 
-Total Pull Requests Created/Merged: 3
+Total Pull Requests Created/Merged: 4
 
    1. [ViaQ/Main#5](https://github.com/ViaQ/Main/pull/5) - Added Patch OpenShift Ansible
    2. [ViaQ/Main#10](https://github.com/ViaQ/Main/pull/10) - Updated Fluentd Pod Config
