@@ -49,8 +49,7 @@
 ## Blog posts
 
    - [GSoC with Kubernetes@CNCF](https://medium.com/@AMIT_GKP/gsoc-with-cncf-4d619866d01f)
-   
-   Note: I have decided not to post any weekly updates as blog posts as such. I'll soon post a blogposts which will focus more on technical content.
+   - [GSoC 2017@CNCF](https://www.cncf.io/blog/2017/09/05/gsoc-17-create-implement-data-model-standardize-kubernetes-logs/)
    
 ## Pull Requests and Issues
 
